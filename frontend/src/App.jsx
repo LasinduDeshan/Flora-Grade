@@ -6,7 +6,168 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
+  const [showCamera, setShowCamera] = useState(false)
+  const [cameraStream, setCameraStream] = useState(null)
   const fileInputRef = useRef(null)
+  const videoRef = useRef(null)
+  const canvasRef = useRef(null)
+
+  // Camera functions
+  const startCamera = async () => {
+    try {
+      // Check if we're on HTTPS or localhost
+      const isSecure = window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      
+      if (!isSecure) {
+        setError('❌ Camera access requires HTTPS or localhost. Please use: http://localhost:5173')
+        return
+      }
+      
+      // Check if camera is supported with better compatibility
+      if (!navigator.mediaDevices) {
+        // Fallback for older browsers
+        navigator.mediaDevices = {}
+      }
+      
+      if (!navigator.mediaDevices.getUserMedia) {
+        // Fallback for older browsers
+        navigator.mediaDevices.getUserMedia = function(constraints) {
+          const getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia
+          
+          if (!getUserMedia) {
+            setError('Camera is not supported in this browser. Please use a modern browser like Chrome, Safari, or Firefox.')
+            return Promise.reject(new Error('getUserMedia is not implemented in this browser'))
+          }
+          
+          return new Promise(function(resolve, reject) {
+            getUserMedia.call(navigator, constraints, resolve, reject)
+          })
+        }
+      }
+
+      // Check permissions first (only if supported)
+      if (navigator.permissions && navigator.permissions.query) {
+        try {
+          const permission = await navigator.permissions.query({ name: 'camera' })
+          if (permission.state === 'denied') {
+            setError('Camera permission was denied. Please allow camera access in your browser settings and try again.')
+            return
+          }
+        } catch (permError) {
+          // Permissions API might not be supported, continue anyway
+          console.log('Permissions API not supported, continuing...')
+        }
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'environment', // Use back camera if available
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        } 
+      })
+      setCameraStream(stream)
+      setShowCamera(true)
+      setError(null) // Clear any previous errors
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+      }
+    } catch (err) {
+      console.error('Error accessing camera:', err)
+      if (err.name === 'NotAllowedError') {
+        setError('Camera permission was denied. Please allow camera access and try again.')
+      } else if (err.name === 'NotFoundError') {
+        setError('No camera found on your device.')
+      } else if (err.name === 'NotSupportedError') {
+        setError('Camera is not supported in this browser.')
+      } else if (err.message.includes('getUserMedia is not implemented')) {
+        setError('Camera is not supported in this browser. Please use Chrome, Safari, or Firefox.')
+      } else {
+        setError(`Camera error: ${err.message}. Please check your browser settings.`)
+      }
+    }
+  }
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop())
+      setCameraStream(null)
+    }
+    setShowCamera(false)
+  }
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current
+      const canvas = canvasRef.current
+      const context = canvas.getContext('2d')
+      
+      // Set canvas size to match video
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      
+      // Draw video frame to canvas
+      context.drawImage(video, 0, 0, canvas.width, canvas.height)
+      
+      // Convert canvas to blob
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const file = new File([blob], 'camera-photo.jpg', { type: 'image/jpeg' })
+          setImage(file)
+          setPreview(URL.createObjectURL(blob))
+          setResult(null)
+          setError(null)
+          stopCamera()
+        }
+      }, 'image/jpeg', 0.9)
+    }
+  }
+
+  const testCameraPermission = async () => {
+    try {
+      setError(null)
+      
+      // Check if we're on HTTPS or localhost
+      const isSecure = window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      
+      if (!isSecure) {
+        setError('❌ Camera access requires HTTPS or localhost. Please use: http://localhost:5173')
+        return
+      }
+      
+      // Check if camera is supported with better compatibility
+      if (!navigator.mediaDevices) {
+        navigator.mediaDevices = {}
+      }
+      
+      if (!navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia = function(constraints) {
+          const getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia
+          
+          if (!getUserMedia) {
+            return Promise.reject(new Error('getUserMedia is not implemented in this browser'))
+          }
+          
+          return new Promise(function(resolve, reject) {
+            getUserMedia.call(navigator, constraints, resolve, reject)
+          })
+        }
+      }
+      
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+      stream.getTracks().forEach(track => track.stop()) // Stop immediately
+      setError('✅ Camera permission granted! You can now use the camera feature.')
+      setTimeout(() => setError(null), 3000) // Clear after 3 seconds
+    } catch (err) {
+      if (err.name === 'NotAllowedError') {
+        setError('❌ Camera permission denied. Please allow camera access in your browser settings.')
+      } else if (err.message.includes('getUserMedia is not implemented')) {
+        setError('❌ Camera is not supported in this browser. Please use Chrome, Safari, or Firefox.')
+      } else {
+        setError(`❌ Camera test failed: ${err.message}`)
+      }
+    }
+  }
 
   const handleImageChange = (e) => {
     const file = e.target.files[0]
@@ -147,6 +308,55 @@ function App() {
                 </h2>
                 
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Camera and Upload Options */}
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <button
+                      type="button"
+                      onClick={startCamera}
+                      className="group relative overflow-hidden bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-cyan-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="relative flex items-center justify-center space-x-2">
+                        <svg className="w-5 h-5 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span>Take Photo</span>
+                      </div>
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="group relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-700 to-pink-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="relative flex items-center justify-center space-x-2">
+                        <svg className="w-5 h-5 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>Browse Files</span>
+                      </div>
+                    </button>
+                  </div>
+
+                  {/* Camera Permission Test */}
+                  <div className="mb-4">
+                    <button
+                      type="button"
+                      onClick={testCameraPermission}
+                      className="w-full group relative overflow-hidden bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 text-sm"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-green-700 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="relative flex items-center justify-center space-x-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Test Camera Permission</span>
+                      </div>
+                    </button>
+                  </div>
+
                   <div
                     className="group relative cursor-pointer bg-gray-800/50 rounded-xl border-2 border-dashed border-gray-700 hover:border-purple-500/50 transition-all duration-300 p-8 text-center"
                     onDragOver={handleDragOver}
@@ -382,6 +592,74 @@ function App() {
           </div>
         </div>
       </div>
+
+      {/* Camera Modal */}
+      {showCamera && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm">
+          <div className="relative bg-gray-900 rounded-2xl border border-gray-800 p-6 max-w-2xl w-full mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-white flex items-center">
+                <svg className="w-6 h-6 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Camera
+              </h3>
+              <button
+                onClick={stopCamera}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="relative bg-black rounded-xl overflow-hidden mb-4">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-64 object-cover"
+              />
+              <div className="absolute inset-0 border-4 border-white/20 rounded-xl pointer-events-none"></div>
+            </div>
+            
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={capturePhoto}
+                className="group relative overflow-hidden bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white font-medium py-3 px-8 rounded-lg transition-all duration-300"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-red-700 to-pink-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative flex items-center justify-center space-x-2">
+                  <div className="w-4 h-4 bg-white rounded-full"></div>
+                  <span>Capture Photo</span>
+                </div>
+              </button>
+              
+              <button
+                onClick={stopCamera}
+                className="group relative overflow-hidden bg-gray-700 hover:bg-gray-600 text-white font-medium py-3 px-8 rounded-lg transition-all duration-300"
+              >
+                <div className="relative flex items-center justify-center space-x-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <span>Cancel</span>
+                </div>
+              </button>
+            </div>
+            
+            <p className="text-center text-gray-400 text-sm mt-4">
+              Position your flower in the center of the frame for best results
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden canvas for photo capture */}
+      <canvas ref={canvasRef} className="hidden" />
     </div>
   )
 }
