@@ -5,4 +5,10 @@ opencv-python
 numpy
 Pillow
 reportlab
-python-multipart 
+python-multipart
+requests
+sqlalchemy
+alembic
+python-jose[cryptography]
+passlib[bcrypt]
+python-dotenv 
