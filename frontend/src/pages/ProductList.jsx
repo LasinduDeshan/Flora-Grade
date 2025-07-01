@@ -85,16 +85,16 @@ function ProductList() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
           </div>
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent mb-4">
             Premium Flowers
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
             Discover the finest quality flowers, each graded by our advanced AI system for guaranteed excellence
           </p>
         </div>
 
         {/* Filters */}
-        <div className="bg-white/70 backdrop-blur-xl border border-white/20 rounded-3xl p-8 mb-12 shadow-xl shadow-gray-900/5">
+        <div className="  rounded-3xl p-8 mb-12 ">
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-gray-900">Search Flowers</label>
@@ -109,7 +109,7 @@ function ProductList() {
                   placeholder="Search by name or description..."
                   value={filters.search}
                   onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                  className="w-full pl-12 pr-4 py-3 border-0 bg-white/50 backdrop-blur-sm rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-gray-900/10 focus:bg-white transition-all duration-200 shadow-sm"
+                  className="w-full pl-12 pr-4 py-3  bg-white/50  border-1 border-black rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-gray-900/10 focus:bg-white transition-all duration-200 shadow-sm"
                 />
               </div>
             </div>

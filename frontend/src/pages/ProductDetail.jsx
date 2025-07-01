@@ -10,9 +10,9 @@ const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [mainImage, setMainImage] = useState('');
   const { addItem } = useCartStore();
 
-  // Construct full image URL
   const getImageUrl = (imageUrl) => {
     if (!imageUrl) return '';
     if (imageUrl.startsWith('http')) return imageUrl;
@@ -29,8 +29,9 @@ const ProductDetail = () => {
       setLoading(true);
       const response = await productsAPI.getProduct(id);
       setProduct(response.data);
+      setMainImage(getImageUrl(response.data.product.image_url));
     } catch (error) {
-      toast.error('Failed to load product');
+      toast.error('Failed to load product details');
     } finally {
       setLoading(false);
     }
@@ -38,17 +39,25 @@ const ProductDetail = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-300"></div>
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Product not found</h2>
-        <Link to="/products" className="text-green-600 hover:underline">Back to Products</Link>
+      <div className="text-center py-20">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Product not found</h2>
+        <Link 
+          to="/products" 
+          className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors"
+        >
+          <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Products
+        </Link>
       </div>
     );
   }
@@ -56,49 +65,80 @@ const ProductDetail = () => {
   const { product: prod, flower_grade, seller } = product;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="grid md:grid-cols-2 gap-8">
-        <div>
-          <img
-            src={getImageUrl(prod.image_url)}
-            alt={prod.name}
-            className="w-full h-96 object-cover rounded-lg shadow"
-            onError={(e) => {
-              e.target.src = 'https://via.placeholder.com/400x300?text=Image+Not+Available';
-            }}
-          />
-        </div>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{prod.name}</h1>
-          <p className="text-gray-600 mb-4">{prod.description}</p>
-          <div className="mb-4">
-            <span className="text-2xl font-bold text-green-600">{formatPrice(prod.price)}</span>
-            <span className="ml-4 text-sm text-gray-500">Stock: {prod.stock_quantity}</span>
-          </div>
-          {flower_grade && (
-            <div className="mb-4">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getGradeColor(flower_grade.grade)}`}>
-                Grade {flower_grade.grade}
-              </span>
-              <div className="mt-2 text-xs text-gray-600">{flower_grade.explanation}</div>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="grid md:grid-cols-2 gap-8 p-8">
+          {/* Image Gallery */}
+          <div className="space-y-4">
+            <div className="bg-gray-50 rounded-lg overflow-hidden">
+              <img
+                src={mainImage || 'https://via.placeholder.com/600x600?text=Flower+Image'}
+                alt={prod.name}
+                className="w-full h-96 object-contain"
+                onError={(e) => {
+                  e.target.src = 'https://via.placeholder.com/600x600?text=Image+Not+Available';
+                }}
+              />
             </div>
-          )}
-          <div className="mb-4">
-            <Button
-              onClick={() => {
-                addItem(prod, 1);
-                toast.success('Added to cart!');
-              }}
-              disabled={prod.stock_quantity === 0 || !prod.is_approved}
-            >
-              Add to Cart
-            </Button>
           </div>
-          <div className="text-sm text-gray-500">
-            Sold by: <span className="font-medium text-gray-900">{seller.full_name}</span>
-          </div>
-          <div className="mt-6">
-            <Link to="/products" className="text-green-600 hover:underline">Back to Products</Link>
+
+          {/* Product Info */}
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-semibold text-gray-900 mb-2">{prod.name}</h1>
+              <div className="flex items-center space-x-2 mb-4">
+                <span className="text-lg font-medium text-gray-900">{formatPrice(prod.price)}</span>
+                <span className={`text-xs px-2 py-1 rounded ${prod.stock_quantity > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                  {prod.stock_quantity > 0 ? 'In Stock' : 'Out of Stock'}
+                </span>
+              </div>
+              <p className="text-gray-600 leading-relaxed">{prod.description}</p>
+            </div>
+
+            {/* Grade Information */}
+            {flower_grade && (
+              <div className="border-t border-b border-gray-100 py-4">
+                <div className="flex items-center space-x-3">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getGradeColor(flower_grade.grade)}`}>
+                    Grade {flower_grade.grade}
+                  </span>
+                  <span className="text-sm text-gray-500">{flower_grade.explanation}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Add to Cart */}
+            <div className="pt-2">
+              <Button
+                onClick={() => {
+                  addItem(prod, 1);
+                  toast.success('Added to cart!');
+                }}
+                disabled={prod.stock_quantity === 0 || !prod.is_approved}
+                className="w-full md:w-auto"
+              >
+                {prod.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+              </Button>
+            </div>
+
+            {/* Seller Info */}
+            <div className="text-sm text-gray-600 pt-4 border-t border-gray-100">
+              <p className="mb-1">Sold by: <span className="font-medium text-gray-900">{seller.full_name}</span></p>
+              <p>Category: <span className="font-medium text-gray-900 capitalize">{prod.category}</span></p>
+            </div>
+
+            {/* Back Link */}
+            <div className="pt-4">
+              <Link 
+                to="/products" 
+                className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to all products
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -106,4 +146,4 @@ const ProductDetail = () => {
   );
 };
 
-export default ProductDetail; 
+export default ProductDetail;

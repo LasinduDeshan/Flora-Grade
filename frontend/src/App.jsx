@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from './lib/store'
 import Header from './components/Header'
 import Home from './pages/Home'
@@ -14,6 +14,19 @@ import SellerDashboard from './pages/SellerDashboard'
 import FlowerGrading from './pages/FlowerGrading'
 import Profile from './pages/Profile'
 import Orders from './pages/Orders'
+import Footer from './components/Footer'
+
+function AppLayout({ children, user, logout }) {
+  const location = useLocation();
+  const hideHeaderFooter = location.pathname === '/login' || location.pathname === '/register';
+  return (
+    <div className="min-h-screen bg-gray-950 text-gray-100">
+      {!hideHeaderFooter && <Header user={user} onLogout={logout} />}
+      <main className={!hideHeaderFooter ? "pt-16" : ""}>{children}</main>
+      {!hideHeaderFooter && <Footer />}
+    </div>
+  );
+}
 
 function App() {
   const { user, token, isAuthenticated, logout: storeLogout } = useAuthStore()
@@ -87,29 +100,31 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-gray-950 text-gray-100">
-        <Header user={user} onLogout={logout} />
-        <main className="pt-16">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
-            <Route path="/register" element={!user ? <Register onRegister={register} /> : <Navigate to="/" />} />
-            <Route path="/products" element={<ProductList />} />
-            <Route path="/products/:id" element={<ProductDetail />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/flower-grading" element={<FlowerGrading />} />
-            <Route path="/profile" element={user ? <Profile user={user} /> : <Navigate to="/login" />} />
-            <Route path="/orders" element={user ? <Orders /> : <Navigate to="/login" />} />
-            
-            {/* Seller Routes */}
-            <Route path="/seller/add-product" element={user?.role === 'seller' ? <AddProduct /> : <Navigate to="/login" />} />
-            <Route path="/seller/dashboard" element={user?.role === 'seller' ? <SellerDashboard /> : <Navigate to="/login" />} />
-            
-            {/* Admin Routes */}
-            <Route path="/admin/dashboard" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/login" />} />
-          </Routes>
-        </main>
-      </div>
+      <Routes>
+        <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
+        <Route path="/register" element={!user ? <Register onRegister={register} /> : <Navigate to="/" />} />
+        <Route
+          path="*"
+          element={
+            <AppLayout user={user} logout={logout}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/products" element={<ProductList />} />
+                <Route path="/products/:id" element={<ProductDetail />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/flower-grading" element={<FlowerGrading />} />
+                <Route path="/profile" element={user ? <Profile user={user} /> : <Navigate to="/login" />} />
+                <Route path="/orders" element={user ? <Orders /> : <Navigate to="/login" />} />
+                {/* Seller Routes */}
+                <Route path="/seller/add-product" element={user?.role === 'seller' ? <AddProduct /> : <Navigate to="/login" />} />
+                <Route path="/seller/dashboard" element={user?.role === 'seller' ? <SellerDashboard /> : <Navigate to="/login" />} />
+                {/* Admin Routes */}
+                <Route path="/admin/dashboard" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/login" />} />
+              </Routes>
+            </AppLayout>
+          }
+        />
+      </Routes>
     </Router>
   )
 }

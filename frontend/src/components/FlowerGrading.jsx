@@ -63,23 +63,19 @@ function FlowerGrading() {
     setError(null)
     const formData = new FormData()
     formData.append('file', image)
-    
-    // Simulate API call with mock data
-    setTimeout(() => {
-      const mockResult = {
-        grade: 'A',
-        explanation: 'This flower demonstrates exceptional quality with vibrant colors, perfect symmetry, and minimal damage. The petals show excellent uniformity and the overall structure is pristine.',
-        metrics: {
-          color_vibrancy: 0.92,
-          symmetry: 0.88,
-          circularity: 0.85,
-          edge_density: 0.12,
-          brown_ratio: 0.05
-        }
-      }
-      setResult(mockResult)
+    try {
+      const response = await fetch('http://localhost:8001/flower-api/grade-flower', {
+        method: 'POST',
+        body: formData,
+      })
+      if (!response.ok) throw new Error('Grading failed')
+      const data = await response.json()
+      setResult(data)
+    } catch (err) {
+      setError('Grading failed. Please try again.')
+    } finally {
       setLoading(false)
-    }, 2000)
+    }
   }
 
   const handleDownloadReport = async () => {

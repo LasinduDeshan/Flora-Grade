@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Flower2, Star, ArrowRight, Sparkles, Shield, Zap, CheckCircle, Clock, Award } from 'lucide-react';
+import { Flower2,  ArrowRight, Sparkles, Shield, Zap, CheckCircle, Clock, Award ,Star, Quote, ChevronLeft, ChevronRight} from 'lucide-react';
 
 const Home = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -21,30 +21,100 @@ const Home = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const testimonials = [
-    { name: "Sarah Chen", role: "Event Planner", text: "The AI grading gives me complete confidence in flower quality. Every order is perfect!" },
-    { name: "Marcus Johnson", role: "Florist", text: "FloraGrade has revolutionized how I source premium flowers. The quality is unmatched." },
-    { name: "Emma Rodriguez", role: "Wedding Coordinator", text: "Grade A flowers every time. My brides are always thrilled with the arrangements." }
+ const testimonials = [
+    {
+      text: "This platform completely transformed how we approach our workflow. The intuitive design and powerful features saved us countless hours every week.",
+      name: "Sarah Chen",
+      role: "Product Manager",
+      company: "TechFlow",
+      avatar: "SC",
+      rating: 5
+    },
+    {
+      text: "The level of customization and attention to detail is incredible. It's like having a dedicated team member that never sleeps.",
+      name: "Marcus Rodriguez",
+      role: "Creative Director",
+      company: "DesignLab",
+      avatar: "MR",
+      rating: 5
+    },
+    {
+      text: "I've tried dozens of similar tools, but nothing comes close to this level of sophistication and ease of use. Game-changing.",
+      name: "Emily Watson",
+      role: "Startup Founder",
+      company: "InnovateCo",
+      avatar: "EW",
+      rating: 5
+    },
+    {
+      text: "The ROI was immediate. Within the first month, we saw a 40% increase in productivity across all our teams.",
+      name: "David Kim",
+      role: "Operations Lead",
+      company: "ScaleUp",
+      avatar: "DK",
+      rating: 5
+    },
+    {
+      text: "Outstanding support and seamless integration. Our entire team adopted it within days, not weeks.",
+      name: "Lisa Park",
+      role: "Tech Lead",
+      company: "DevCorp",
+      avatar: "LP",
+      rating: 5
+    },
+    {
+      text: "The analytics and insights have revolutionized our decision-making process. We're more data-driven than ever.",
+      name: "James Wilson",
+      role: "Data Analyst",
+      company: "Insights Pro",
+      avatar: "JW",
+      rating: 5
+    }
   ];
+
+  // Console log current testimonial for debugging
+  useEffect(() => {
+    console.log(`Current testimonial: ${currentTestimonial + 1}/${testimonials.length}`);
+    console.log(`Showing testimonial from: ${testimonials[currentTestimonial].name}`);
+  }, [currentTestimonial]);
+
+  const nextTestimonial = () => {
+    if (!isAnimating) {
+      setIsAnimating(true);
+      const newIndex = (currentTestimonial + 1) % testimonials.length;
+      setCurrentTestimonial(newIndex);
+      console.log(`Navigation: Next -> Moving to testimonial ${newIndex + 1}`);
+      setTimeout(() => setIsAnimating(false), 500);
+    }
+  };
+
+  const previousTestimonial = () => {
+    if (!isAnimating) {
+      setIsAnimating(true);
+      const newIndex = (currentTestimonial - 1 + testimonials.length) % testimonials.length;
+      setCurrentTestimonial(newIndex);
+      console.log(`Navigation: Previous -> Moving to testimonial ${newIndex + 1}`);
+      setTimeout(() => setIsAnimating(false), 500);
+    }
+  };
+
+  const goToTestimonial = (index) => {
+    if (!isAnimating && index !== currentTestimonial) {
+      setIsAnimating(true);
+      setCurrentTestimonial(index);
+      console.log(`Direct navigation: Moving to testimonial ${index + 1}`);
+      setTimeout(() => setIsAnimating(false), 500);
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/50 to-slate-950 overflow-hidden">
+  
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        {/* Background Image */}
-        <div className="absolute inset-0 -z-20">
-          <img
-            src="/images/back.png"
-            alt="Beautiful flowers background"
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              console.log('Image failed to load:', e.target.src);
-              e.target.style.display = 'none';
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-950/80 via-purple-950/70 to-slate-950/90"></div>
-        </div>
-
+      <section className="relative min-h-screen flex items-center justify-start pl-10 px-4 sm:px-6 lg:pl-[280px] bg-[url('assets/img/back6.png')] bg-right bg-contain bg-no-repeat">
+        {/* Background Pattern - Flower-inspired */}
+        
         {/* Animated Background */}
         <div className="fixed inset-0 -z-10">
           <div 
@@ -59,7 +129,7 @@ const Home = () => {
           <div className="absolute bottom-32 left-20 w-80 h-80 bg-gradient-to-tr from-indigo-600/20 to-pink-600/20 rounded-full blur-3xl animate-pulse delay-1000" />
         </div>
 
-        <div className="max-w-7xl mx-auto text-center">
+        <div className="max-w-7xl w-full">
           {/* Floating Badge */}
           <div className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 backdrop-blur-xl rounded-full border border-white/10 mb-8 text-sm font-medium text-violet-300 shadow-2xl animate-float">
             <Sparkles className="w-4 h-4" />
@@ -68,27 +138,27 @@ const Home = () => {
           </div>
 
           {/* Main Heading */}
-          <h1 className="text-5xl md:text-7xl lg:text-6xl font-black mb-8 tracking-tight">
+          <h1 className="text-5xl md:text-7xl lg:text-6xl font-black mb-8 tracking-tight text-left">
             <span className="block bg-gradient-to-r from-violet-300 via-fuchsia-300 to-pink-300 bg-clip-text text-transparent animate-gradient-x">
               Premium
-              <span className=" text-white/90 ml-5 ">
-               Flowers
-            </span>
+              <span className="text-white/90 ml-5">
+                Flowers
+              </span>
             </span>
             
-            <span className="block text-3xl md:text-4xl lg:text-3xl font-light text-gray-400 mt-4">
+            <span className="block text-3xl md:text-4xl lg:text-3xl font-light text-gray-400 mt-4 text-left">
               Curated by AI
             </span>
           </h1>
 
-          <p className="text-xl md:text-sm text-gray-300/80 max-w-3xl mx-auto mb-12 leading-relaxed font-light">
+          <p className="text-xl md:text-sm text-gray-300/80 max-w-2xl mb-12 leading-relaxed font-light text-left">
             Experience the future of flower shopping. Our advanced AI analyzes every bloom for 
             <span className="text-transparent bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text font-medium"> perfection</span>, 
             delivering only Grade A & B quality flowers to your doorstep.
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
+          <div className="flex flex-col sm:flex-row gap-6 mb-16 justify-start">
             <button
               className="group relative px-10 py-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-2xl font-semibold text-white text-lg shadow-2xl hover:shadow-violet-500/25 transition-all duration-500 transform hover:scale-105 hover:-translate-y-1 overflow-hidden"
               onClick={() => window.location.href = '/products'}
@@ -111,30 +181,28 @@ const Home = () => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-thin text-white mb-1">99.8%</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 max-w-3xl">
+            <div className="text-left bottom ">
+              <div className="text-2xl md:text-3xl font-thin text-white mb-1">99.8%</div>
               <div className="text-sm text-gray-400 uppercase tracking-wide">Accuracy Rate</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-thin text-white mb-1">50K+</div>
+            
+            <div className="text-left">
+              <div className="text-2xl md:text-3xl font-thin text-white mb-1">50K+</div>
               <div className="text-sm text-gray-400 uppercase tracking-wide">Flowers Graded</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-thin text-white mb-1">24hrs</div>
+            <div className="text-left">
+              <div className="text-2xl md:text-3xl font-thin text-white mb-1">24hrs</div>
               <div className="text-sm text-gray-400 uppercase tracking-wide">Fresh Delivery</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-thin text-white mb-1">10K+</div>
+            <div className="text-left">
+              <div className="text-2xl md:text-3xl font-thin text-white mb-1">10K+</div>
               <div className="text-sm text-gray-400 uppercase tracking-wide">Happy Customers</div>
             </div>
           </div>
         </div>
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className="w-1 h-16 bg-gradient-to-b from-transparent via-white/50 to-transparent rounded-full" />
-        </div>
+        
       </section>
 
       {/* Features Section */}
@@ -235,46 +303,149 @@ const Home = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="py-32 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-6xl font-bold text-white mb-20">
-            Loved by <span className="bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent">Professionals</span>
+      <section className="py-32 px-4 sm:px-6 lg:px-8 bg-transparent relative overflow-hidden">
+      
+
+      <div className="max-w-5xl mx-auto relative z-10">
+        {/* Header */}
+        <div className="text-center mb-20">
+          <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-8">
+            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+            <span className="text-sm font-medium text-white/80">Trusted by 10,000+ professionals</span>
+          </div>
+          
+          <h2 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-200 to-white mb-6">
+            Loved by{' '}
+            <span className="bg-gradient-to-r from-violet-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
+              Innovators
+            </span>
           </h2>
           
-          <div className="relative overflow-hidden rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 p-12">
-            <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentTestimonial * 100}%)` }}>
-              {testimonials.map((testimonial, index) => (
-                <div key={index} className="w-full flex-shrink-0">
-                  <div className="flex items-center justify-center mb-6">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-6 h-6 text-yellow-400 fill-current" />
-                    ))}
-                  </div>
-                  <blockquote className="text-xl text-white font-light mb-8 leading-relaxed">
-                    "{testimonial.text}"
-                  </blockquote>
-                  <div>
-                    <div className="font-semibold text-white text-lg">{testimonial.name}</div>
-                    <div className="text-violet-400">{testimonial.role}</div>
+          <p className="text-xl text-white/60 max-w-2xl mx-auto">
+            See why thousands of professionals choose our platform to transform their workflow
+          </p>
+        </div>
+
+        {/* Single Testimonial Card with Navigation */}
+        <div className="relative mb-16">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10"></div>
+            
+            {/* Navigation buttons */}
+            <button
+              onClick={previousTestimonial}
+              disabled={isAnimating}
+              className="absolute left-6 top-1/2 transform -translate-y-1/2 z-20 w-14 h-14 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 group disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="w-6 h-6 text-white group-hover:text-purple-300 transition-colors" />
+            </button>
+            
+            <button
+              onClick={nextTestimonial}
+              disabled={isAnimating}
+              className="absolute right-6 top-1/2 transform -translate-y-1/2 z-20 w-14 h-14 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 group disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronRight className="w-6 h-6 text-white group-hover:text-purple-300 transition-colors" />
+            </button>
+
+            {/* Testimonial content */}
+            <div className="relative px-16 py-16 md:px-24 md:py-20">
+              <div className="text-center max-w-4xl mx-auto">
+                {/* Quote icon */}
+                <div className="flex justify-center mb-8">
+                  <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg transform transition-transform duration-300">
+                    <Quote className="w-10 h-10 text-white" />
                   </div>
                 </div>
-              ))}
-            </div>
-            
-            <div className="flex justify-center mt-8 space-x-2">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                    index === currentTestimonial ? 'bg-violet-400' : 'bg-white/30'
-                  }`}
-                  onClick={() => setCurrentTestimonial(index)}
-                />
-              ))}
+
+                {/* Stars */}
+                <div className="flex items-center justify-center mb-8 gap-1">
+                  {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 text-yellow-400 fill-current drop-shadow-sm" />
+                  ))}
+                </div>
+
+                {/* Testimonial text with animation */}
+                <div className="relative h-32 md:h-24 mb-12 flex items-center justify-center">
+                  <blockquote className={`absolute inset-0 flex items-center justify-center text-2xl md:text-xl text-white font-light leading-relaxed transition-all duration-500 ${
+                    isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
+                  }`}>
+                    "{testimonials[currentTestimonial].text}"
+                  </blockquote>
+                </div>
+
+                {/* Author info with animation */}
+                <div className={`flex items-center justify-center gap-6 transition-all duration-500 delay-100 ${
+                  isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
+                }`}>
+                  <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
+                    <span className="text-white font-bold text-xl">{testimonials[currentTestimonial].avatar}</span>
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-white text-xl">{testimonials[currentTestimonial].name}</div>
+                    <div className="text-purple-300 text-lg">{testimonials[currentTestimonial].role}</div>
+                    <div className="text-white/60 text-base">{testimonials[currentTestimonial].company}</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* Progress indicator */}
+          <div className="flex justify-center mt-8 gap-2">
+            <span className="text-white/60 text-sm">
+              {currentTestimonial + 1} of {testimonials.length}
+            </span>
+          </div>
+
+          {/* Pagination dots */}
+          <div className="flex justify-center mt-6 gap-3">
+            {testimonials.map((_, index) => (
+              <button
+                key={index}
+                className={`group relative overflow-hidden transition-all duration-300 ${
+                  index === currentTestimonial 
+                    ? 'w-12 h-4' 
+                    : 'w-4 h-4 hover:w-6'
+                }`}
+                onClick={() => goToTestimonial(index)}
+                disabled={isAnimating}
+              >
+                <div className={`absolute inset-0 rounded-full transition-all duration-300 ${
+                  index === currentTestimonial
+                    ? 'bg-gradient-to-r from-purple-400 to-pink-400'
+                    : 'bg-white/30 group-hover:bg-white/50'
+                }`}></div>
+                {index === currentTestimonial && (
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 animate-pulse"></div>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
-      </section>
+
+        {/* Stats section */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {[
+            { number: '10,000+', label: 'Happy Users' },
+            { number: '99.9%', label: 'Uptime' },
+            { number: '4.9/5', label: 'Average Rating' },
+            { number: '50+', label: 'Countries' }
+          ].map((stat, index) => (
+            <div key={index} className="text-center group">
+              <div className="inline-flex flex-col items-center p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 transition-all duration-300 group-hover:bg-white/10 group-hover:scale-105 w-full">
+                <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-2">
+                  {stat.number}
+                </div>
+                <div className="text-white/60 text-sm font-medium">
+                  {stat.label}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
 
       {/* CTA Section */}
       <section className="py-32 px-4 sm:px-6 lg:px-8 relative">
@@ -290,25 +461,25 @@ const Home = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Link
-                to="/products"
+              <button
                 className="group px-12 py-5 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-2xl font-bold text-white text-xl shadow-2xl hover:shadow-violet-500/25 transition-all duration-500 transform hover:scale-105 hover:-translate-y-1"
+                onClick={() => window.location.href = '/products'}
               >
                 <span className="flex items-center gap-3">
                   <Flower2 className="w-6 h-6" />
                   Start Shopping
                   <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                 </span>
-              </Link>
-              <Link
-                to="/register"
+              </button>
+              <button
                 className="px-12 py-5 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl font-bold text-white text-xl hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
+                onClick={() => window.location.href = '/register'}
               >
                 <span className="flex items-center gap-3">
                   <Shield className="w-6 h-6" />
                   Become a Seller
                 </span>
-              </Link>
+              </button>
             </div>
           </div>
         </div>

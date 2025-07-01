@@ -66,23 +66,19 @@ function FlowerGrading() {
     setError(null)
     const formData = new FormData()
     formData.append('file', image)
-    
-    // Simulate API call with mock data
-    setTimeout(() => {
-      const mockResult = {
-        grade: 'A',
-        explanation: 'This flower demonstrates exceptional quality with vibrant colors, perfect symmetry, and minimal damage. The petals show excellent uniformity and the overall structure is pristine.',
-        metrics: {
-          color_vibrancy: 0.92,
-          symmetry: 0.88,
-          circularity: 0.85,
-          edge_density: 0.12,
-          brown_ratio: 0.05
-        }
-      }
-      setResult(mockResult)
+    try {
+      const response = await fetch('http://localhost:8001/flower-api/grade-flower', {
+        method: 'POST',
+        body: formData,
+      })
+      if (!response.ok) throw new Error('Grading failed')
+      const data = await response.json()
+      setResult(data)
+    } catch (err) {
+      setError('Grading failed. Please try again.')
+    } finally {
       setLoading(false)
-    }, 2000)
+    }
   }
 
   const handleDownloadReport = async () => {
@@ -143,12 +139,12 @@ function FlowerGrading() {
               AI-Powered Quality Assessment
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
             </div>
-            <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight">
+            <h1 className="text-5xl md:text-5xl font-black mb-6 tracking-tight">
               <span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-pink-300 bg-clip-text text-transparent">
                 Flower Grading
               </span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300/80 max-w-3xl mx-auto leading-relaxed font-light">
+            <p className="text-xl md:text-lg text-gray-300/80 max-w-3xl mx-auto leading-relaxed font-light">
               Upload your flower image and receive instant 
               <span className="text-transparent bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text font-medium"> AI-powered analysis</span> 
               with detailed quality metrics
@@ -165,7 +161,7 @@ function FlowerGrading() {
                     <div className="w-12 h-12 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-2xl flex items-center justify-center">
                       <Upload className="w-6 h-6 text-white" />
                     </div>
-                    <h2 className="text-3xl font-bold text-white">Upload Image</h2>
+                    <h2 className="text-xl font-bold text-white">Upload Image</h2>
                   </div>
                   
                   <form onSubmit={handleSubmit} className="space-y-8">
@@ -203,12 +199,12 @@ function FlowerGrading() {
                           )}
                         </div>
                         <div>
-                          <p className={`text-2xl font-bold mb-3 transition-colors duration-300 ${
+                          <p className={`text-xl font-bold mb-3 transition-colors duration-300 ${
                             isDragging ? 'text-violet-300' : 'text-white group-hover:text-violet-200'
                           }`}>
                             {isDragging ? 'Drop your image here' : 'Drag & drop your flower image'}
                           </p>
-                          <p className={`text-lg transition-colors duration-300 ${
+                          <p className={`text-sm transition-colors duration-300 ${
                             isDragging ? 'text-violet-200' : 'text-gray-400 group-hover:text-gray-300'
                           }`}>
                             or click to browse (JPEG, PNG up to 10MB)
@@ -272,7 +268,7 @@ function FlowerGrading() {
                   <div className="relative">
                     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-3xl blur-xl" />
                     <div className="relative bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
-                      <h2 className="text-3xl font-bold text-white mb-8 flex items-center gap-3">
+                      <h2 className="text-xl font-bold text-white mb-8 flex items-center gap-3">
                         <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-xl flex items-center justify-center">
                           <Award className="w-6 h-6 text-white" />
                         </div>
@@ -285,9 +281,9 @@ function FlowerGrading() {
                           <div className="relative">
                             <div className="flex items-center justify-center gap-4 mb-4">
                               {getGradeIcon(result.grade)}
-                              <div className="text-7xl font-black">Grade {result.grade}</div>
+                              <div className="text-4xl font-black">Grade {result.grade}</div>
                             </div>
-                            <p className="text-2xl font-semibold opacity-90">
+                            <p className="text-lg font-semibold opacity-90">
                               {result.grade === 'A' && 'Exceptional Quality'}
                               {result.grade === 'B' && 'Premium Quality'}
                               {result.grade === 'C' && 'Standard Quality'}
@@ -328,7 +324,7 @@ function FlowerGrading() {
                           <Sparkles className="w-5 h-5 text-violet-400" />
                           AI Analysis Summary
                         </h3>
-                        <p className="text-gray-300 leading-relaxed text-lg">{result.explanation}</p>
+                        <p className="text-gray-300 leading-relaxed text-sm">{result.explanation}</p>
                       </div>
                     </div>
                   </div>
@@ -338,7 +334,7 @@ function FlowerGrading() {
                     <div className="relative">
                       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-3xl blur-xl" />
                       <div className="relative bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
-                        <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                        <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
                           <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-lg flex items-center justify-center">
                             <BarChart3 className="w-5 h-5 text-white" />
                           </div>
@@ -373,7 +369,7 @@ function FlowerGrading() {
                   <div className="relative">
                     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-3xl blur-xl" />
                     <div className="relative bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
-                      <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                      <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
                         <div className="w-8 h-8 bg-gradient-to-br from-green-600 to-emerald-600 rounded-lg flex items-center justify-center">
                           <Download className="w-5 h-5 text-white" />
                         </div>

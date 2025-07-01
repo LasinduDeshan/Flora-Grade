@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, LogOut, Menu, X, Flower } from 'lucide-react';
 import { useAuthStore, useCartStore } from '../lib/store';
 import Button from './ui/Button';
+import Logo from '../assets/img/FloraGrade Logo.png';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -18,19 +19,12 @@ const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-black backdrop-blur-sm ">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-black backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z"/>
-              </svg>
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
-              FloraGrade
-            </span>
+            <img src={Logo} alt="FloraGrade Logo" className="h-14 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -44,32 +38,39 @@ const Header = () => {
             <Link to="/flower-grading" className="text-gray-300 hover:text-purple-300 transition-colors">
               Flower Grading
             </Link>
-            {user && (
-              <>
-                <Link to="/cart" className="text-gray-300 hover:text-purple-300 transition-colors">
-                  Cart
-                </Link>
-                {user.role === 'seller' && (
-                  <Link to="/seller/dashboard" className="text-gray-300 hover:text-purple-300 transition-colors">
-                    Seller Dashboard
-                  </Link>
-                )}
-                {user.role === 'admin' && (
-                  <Link to="/admin/dashboard" className="text-gray-300 hover:text-purple-300 transition-colors">
-                    Admin Dashboard
-                  </Link>
-                )}
-              </>
+            {user && user.role === 'seller' && (
+              <Link to="/seller/dashboard" className="text-gray-300 hover:text-purple-300 transition-colors">
+                Seller Dashboard
+              </Link>
+            )}
+            {user && user.role === 'admin' && (
+              <Link to="/admin/dashboard" className="text-gray-300 hover:text-purple-300 transition-colors">
+                Admin Dashboard
+              </Link>
             )}
           </nav>
 
           {/* User Menu / Auth */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-8"> {/* Changed from space-x-4 to gap-6 */}
+            {user && (
+              <Link 
+                to="/cart" 
+                className="relative text-gray-300 hover:text-purple-300 transition-colors"
+              >
+                <ShoppingCart className="w-6 h-6" />
+                {getItemCount() > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-purple-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {getItemCount()}
+                  </span>
+                )}
+              </Link>
+            )}
+
             {user ? (
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-2 text-gray-300 hover:text-purple-300 transition-colors"
+                  className="flex items-center gap-2 text-gray-300 hover:text-purple-300 transition-colors"
                 >
                   <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center">
                     <span className="text-sm font-medium text-white">
@@ -118,7 +119,7 @@ const Header = () => {
                 )}
               </div>
             ) : (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center gap-4">
                 <Link
                   to="/login"
                   className="text-gray-300 hover:text-purple-300 transition-colors"
@@ -217,4 +218,4 @@ const Header = () => {
   );
 };
 
-export default Header; 
+export default Header;

@@ -12,7 +12,7 @@ const Button = ({
   const baseClasses = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';
   
   const variants = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700',
+    primary: 'bg-black text-white hover:bg-gray-900',
     secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300',
     outline: 'border border-gray-600 bg-transparent text-gray-100 hover:bg-gray-700 hover:border-gray-500',
     ghost: 'hover:bg-gray-100',

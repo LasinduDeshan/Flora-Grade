@@ -185,7 +185,7 @@ const AddProduct = () => {
   }, [token, navigate, gradeData, initialImagePreview]);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 py-8 bg-white text-gray-900 rounded-lg shadow">
       <div className="mb-6">
         <Button
           variant="outline"
