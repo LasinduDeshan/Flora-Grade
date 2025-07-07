@@ -103,4 +103,21 @@ class OrderItem(Base):
     
     # Relationships
     order = relationship("Order", back_populates="items")
-    product = relationship("Product", back_populates="order_items") 
+    product = relationship("Product", back_populates="order_items")
+
+class PendingProduct(Base):
+    __tablename__ = "pending_products"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    description = Column(Text)
+    price = Column(Float)
+    stock_quantity = Column(Integer, default=0)
+    category = Column(String, default="roses")
+    image_url = Column(String)
+    seller_id = Column(Integer, ForeignKey("users.id"))
+    otp = Column(String)
+    email = Column(String)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    seller = relationship("User") 

@@ -4,9 +4,11 @@ import { formatPrice, getGradeColor } from '../lib/utils';
 import Button from './ui/Button';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useState } from 'react';
 
 const ProductCard = ({ product }) => {
   const { addItem } = useCartStore();
+  const [quantity, setQuantity] = useState(1);
 
   // Construct full image URL
   const getImageUrl = (imageUrl) => {
@@ -16,11 +18,12 @@ const ProductCard = ({ product }) => {
   };
 
   const handleAddToCart = () => {
-    addItem(product, 1);
-    toast.success('Added to cart!');
+    addItem(product, quantity);
+    toast.success(`Added ${quantity} to cart!`);
   };
 
   return (
+    
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
       <div className="relative">
         <img
@@ -56,6 +59,36 @@ const ProductCard = ({ product }) => {
           <span className="text-sm text-gray-500">Stock: {product.stock_quantity}</span>
         </div>
 
+        {/* Quantity Selector */}
+        <div className="flex items-center mb-3 gap-2">
+          <button
+            type="button"
+            className="px-2 py-1 bg-gray-200 rounded text-lg font-bold"
+            onClick={() => setQuantity(q => Math.max(1, q - 1))}
+            disabled={quantity <= 1}
+          >-</button>
+          <input
+            type="number"
+            min="1"
+            max={product.stock_quantity}
+            value={quantity}
+            onChange={e => {
+              let val = parseInt(e.target.value, 10);
+              if (isNaN(val) || val < 1) val = 1;
+              if (val > product.stock_quantity) val = product.stock_quantity;
+              setQuantity(val);
+            }}
+            className="w-12 text-center border rounded"
+            disabled={product.stock_quantity === 0}
+          />
+          <button
+            type="button"
+            className="px-2 py-1 bg-gray-200 rounded text-lg font-bold"
+            onClick={() => setQuantity(q => Math.min(product.stock_quantity, q + 1))}
+            disabled={quantity >= product.stock_quantity}
+          >+</button>
+        </div>
+
         {product.flower_grade && (
           <div className="mb-3 p-2 bg-gray-50 rounded text-xs">
             <p className="text-gray-600">{product.flower_grade.explanation}</p>
@@ -73,7 +106,7 @@ const ProductCard = ({ product }) => {
             variant="primary"
             size="sm"
             onClick={handleAddToCart}
-            disabled={product.stock_quantity === 0 || !product.is_approved}
+            disabled={product.stock_quantity === 0 || !product.is_approved || quantity < 1 || quantity > product.stock_quantity}
             className="flex-1"
           >
             <ShoppingCart className="w-4 h-4 mr-1" />

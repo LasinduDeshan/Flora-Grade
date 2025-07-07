@@ -69,7 +69,7 @@ const Profile = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Profile Card */}
           <div className="lg:col-span-1">
-            <div className="bg-gray-900 rounded-xl border border-gray-800 p-6 text-center">
+            <div className="bg-gray-800 rounded-xl border border-gray-800 p-6 text-center">
               <div className="relative inline-block mb-4">
                 <div className="w-32 h-32 rounded-full bg-gray-800 p-1">
                   <img

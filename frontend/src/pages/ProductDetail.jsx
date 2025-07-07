@@ -12,6 +12,7 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [mainImage, setMainImage] = useState('');
   const { addItem } = useCartStore();
+  const [quantity, setQuantity] = useState(1);
 
   const getImageUrl = (imageUrl) => {
     if (!imageUrl) return '';
@@ -23,6 +24,22 @@ const ProductDetail = () => {
     fetchProduct();
     // eslint-disable-next-line
   }, [id]);
+
+  // Save last viewed product to localStorage
+  useEffect(() => {
+    if (!product) return;
+    const prodData = {
+      id: product.product.id,
+      name: product.product.name,
+      price: product.product.price,
+      image: product.product.image_url
+    };
+    let viewed = JSON.parse(localStorage.getItem('lastViewedProducts') || '[]');
+    viewed = viewed.filter(p => p.id !== prodData.id);
+    viewed.unshift(prodData);
+    viewed = viewed.slice(0, 5);
+    localStorage.setItem('lastViewedProducts', JSON.stringify(viewed));
+  }, [product]);
 
   const fetchProduct = async () => {
     try {
@@ -83,7 +100,7 @@ const ProductDetail = () => {
           </div>
 
           {/* Product Info */}
-          <div className="space-y-6">
+          <div className="space-y-6 ">
             <div>
               <h1 className="text-3xl font-semibold text-gray-900 mb-2">{prod.name}</h1>
               <div className="flex items-center space-x-2 mb-4">
@@ -107,17 +124,47 @@ const ProductDetail = () => {
               </div>
             )}
 
+            {/* Quantity Selector */}
+            <div className="flex items-center mb-4 gap-2">
+              <button
+                type="button"
+                className="px-2 py-1 bg-gray-500 rounded text-lg font-bold text-white"
+                onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                disabled={quantity <= 1}
+              >-</button>
+              <input
+                type="number"
+                min="1"
+                max={prod.stock_quantity}
+                value={quantity}
+                onChange={e => {
+                  let val = parseInt(e.target.value, 10);
+                  if (isNaN(val) || val < 1) val = 1;
+                  if (val > prod.stock_quantity) val = prod.stock_quantity;
+                  setQuantity(val);
+                }}
+                className="w-12 text-center border rounded text-black"
+                disabled={prod.stock_quantity === 0}
+              />
+              <button
+                type="button"
+                className="px-2 py-1 bg-gray-500 rounded text-lg font-bold text-white"
+                onClick={() => setQuantity(q => Math.min(prod.stock_quantity, q + 1))}
+                disabled={quantity >= prod.stock_quantity}
+              >+</button>
+            </div>
+
             {/* Add to Cart */}
             <div className="pt-2">
               <Button
                 onClick={() => {
-                  addItem(prod, 1);
-                  toast.success('Added to cart!');
+                  addItem(prod, quantity);
+                  toast.success(`Added ${quantity} to cart!`);
                 }}
-                disabled={prod.stock_quantity === 0 || !prod.is_approved}
+                disabled={prod.stock_quantity === 0 || !prod.is_approved || quantity < 1 || quantity > prod.stock_quantity}
                 className="w-full md:w-auto"
               >
-                {prod.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+                {prod.stock_quantity === 0 ? 'Out of Stock' : `Add ${quantity} to Cart`}
               </Button>
             </div>
 

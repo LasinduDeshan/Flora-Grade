@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Heart } from 'lucide-react';
 import { useCartStore } from '../lib/store';
 import { formatPrice } from '../lib/utils';
@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 const Cart = () => {
   const { items, removeItem, updateQuantity, getTotal, clearCart } = useCartStore();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const navigate = useNavigate();
 
   const getImageUrl = (imageUrl) => {
     if (!imageUrl) return '';
@@ -26,12 +27,7 @@ const Cart = () => {
   };
 
   const handleCheckout = () => {
-    setIsCheckingOut(true);
-    setTimeout(() => {
-      clearCart();
-      setIsCheckingOut(false);
-      toast.success('Order placed successfully!');
-    }, 2000);
+    navigate('/checkout');
   };
 
   if (items.length === 0) {

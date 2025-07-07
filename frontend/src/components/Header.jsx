@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingCart, User, LogOut, Menu, X, Flower } from 'lucide-react';
 import { useAuthStore, useCartStore } from '../lib/store';
 import Button from './ui/Button';
@@ -11,6 +11,7 @@ const Header = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
   const { getItemCount } = useCartStore();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
@@ -29,22 +30,22 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-gray-300 hover:text-purple-300 transition-colors">
+            <Link to="/" className={`text-gray-300 hover:text-purple-300 transition-colors${location.pathname === '/' ? ' text-purple-400 underline' : ''}`}>
               Home
             </Link>
-            <Link to="/products" className="text-gray-300 hover:text-purple-300 transition-colors">
+            <Link to="/products" className={`text-gray-300 hover:text-purple-300 transition-colors${location.pathname.startsWith('/products') ? ' text-purple-400 underline' : ''}`}>
               Products
             </Link>
-            <Link to="/flower-grading" className="text-gray-300 hover:text-purple-300 transition-colors">
+            <Link to="/flower-grading" className={`text-gray-300 hover:text-purple-300 transition-colors${location.pathname.startsWith('/flower-grading') ? ' text-purple-400 underline' : ''}`}>
               Flower Grading
             </Link>
             {user && user.role === 'seller' && (
-              <Link to="/seller/dashboard" className="text-gray-300 hover:text-purple-300 transition-colors">
+              <Link to="/seller/dashboard" className={`text-gray-300 hover:text-purple-300 transition-colors${location.pathname.startsWith('/seller/dashboard') ? ' text-purple-400 underline' : ''}`}>
                 Seller Dashboard
               </Link>
             )}
             {user && user.role === 'admin' && (
-              <Link to="/admin/dashboard" className="text-gray-300 hover:text-purple-300 transition-colors">
+              <Link to="/admin/dashboard" className={`text-gray-300 hover:text-purple-300 transition-colors${location.pathname.startsWith('/admin/dashboard') ? ' text-purple-400 underline' : ''}`}>
                 Admin Dashboard
               </Link>
             )}
@@ -84,7 +85,7 @@ const Header = () => {
                 </button>
 
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700 py-2">
+                  <div className="absolute right-0 mt-2 w-48 bg-black rounded-lg shadow-lg border border-gray-700 py-2">
                     <Link
                       to="/profile"
                       className="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
@@ -153,21 +154,21 @@ const Header = () => {
             <nav className="flex flex-col space-y-4">
               <Link
                 to="/"
-                className="text-gray-300 hover:text-purple-300 transition-colors"
+                className={`text-gray-300 hover:text-purple-300 transition-colors${location.pathname === '/' ? ' text-purple-400 underline' : ''}`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
               </Link>
               <Link
                 to="/products"
-                className="text-gray-300 hover:text-purple-300 transition-colors"
+                className={`text-gray-300 hover:text-purple-300 transition-colors${location.pathname.startsWith('/products') ? ' text-purple-400 underline' : ''}`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Products
               </Link>
               <Link
                 to="/flower-grading"
-                className="text-gray-300 hover:text-purple-300 transition-colors"
+                className={`text-gray-300 hover:text-purple-300 transition-colors${location.pathname.startsWith('/flower-grading') ? ' text-purple-400 underline' : ''}`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Flower Grading
@@ -176,7 +177,7 @@ const Header = () => {
                 <>
                   <Link
                     to="/cart"
-                    className="text-gray-300 hover:text-purple-300 transition-colors"
+                    className={`text-gray-300 hover:text-purple-300 transition-colors${location.pathname.startsWith('/cart') ? ' text-purple-400 underline' : ''}`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Cart
@@ -184,7 +185,7 @@ const Header = () => {
                   {user.role === 'seller' && (
                     <Link
                       to="/seller/dashboard"
-                      className="text-gray-300 hover:text-purple-300 transition-colors"
+                      className={`text-gray-300 hover:text-purple-300 transition-colors${location.pathname.startsWith('/seller/dashboard') ? ' text-purple-400 underline' : ''}`}
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Seller Dashboard
@@ -193,7 +194,7 @@ const Header = () => {
                   {user.role === 'seller' && (
                     <Link
                       to="/seller/add-product"
-                      className="text-gray-300 hover:text-purple-300 transition-colors"
+                      className={`text-gray-300 hover:text-purple-300 transition-colors${location.pathname.startsWith('/seller/add-product') ? ' text-purple-400 underline' : ''}`}
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Add Product
@@ -202,7 +203,7 @@ const Header = () => {
                   {user.role === 'admin' && (
                     <Link
                       to="/admin/dashboard"
-                      className="text-gray-300 hover:text-purple-300 transition-colors"
+                      className={`text-gray-300 hover:text-purple-300 transition-colors${location.pathname.startsWith('/admin/dashboard') ? ' text-purple-400 underline' : ''}`}
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Admin Dashboard

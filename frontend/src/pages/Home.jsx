@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Flower2,  ArrowRight, Sparkles, Shield, Zap, CheckCircle, Clock, Award ,Star, Quote, ChevronLeft, ChevronRight} from 'lucide-react';
+import { Flower2, ArrowRight, Sparkles, Shield, Zap, CheckCircle, Clock, Award, Star, Quote, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Home = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const testimonialsPerPage = 3;
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -14,15 +15,17 @@ const Home = () => {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  // Auto-switch testimonials
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentTestimonial((prev) => (prev + 1) % 3);
-    }, 4000);
+      nextTestimonial();
+    }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [currentTestimonialIndex]);
 
- const testimonials = [
+  const testimonials = [
     {
+      id: 1,
       text: "This platform completely transformed how we approach our workflow. The intuitive design and powerful features saved us countless hours every week.",
       name: "Sarah Chen",
       role: "Product Manager",
@@ -31,6 +34,7 @@ const Home = () => {
       rating: 5
     },
     {
+      id: 2,
       text: "The level of customization and attention to detail is incredible. It's like having a dedicated team member that never sleeps.",
       name: "Marcus Rodriguez",
       role: "Creative Director",
@@ -39,6 +43,7 @@ const Home = () => {
       rating: 5
     },
     {
+      id: 3,
       text: "I've tried dozens of similar tools, but nothing comes close to this level of sophistication and ease of use. Game-changing.",
       name: "Emily Watson",
       role: "Startup Founder",
@@ -47,6 +52,7 @@ const Home = () => {
       rating: 5
     },
     {
+      id: 4,
       text: "The ROI was immediate. Within the first month, we saw a 40% increase in productivity across all our teams.",
       name: "David Kim",
       role: "Operations Lead",
@@ -55,6 +61,7 @@ const Home = () => {
       rating: 5
     },
     {
+      id: 5,
       text: "Outstanding support and seamless integration. Our entire team adopted it within days, not weeks.",
       name: "Lisa Park",
       role: "Tech Lead",
@@ -63,6 +70,7 @@ const Home = () => {
       rating: 5
     },
     {
+      id: 6,
       text: "The analytics and insights have revolutionized our decision-making process. We're more data-driven than ever.",
       name: "James Wilson",
       role: "Data Analyst",
@@ -72,50 +80,35 @@ const Home = () => {
     }
   ];
 
-  // Console log current testimonial for debugging
-  useEffect(() => {
-    console.log(`Current testimonial: ${currentTestimonial + 1}/${testimonials.length}`);
-    console.log(`Showing testimonial from: ${testimonials[currentTestimonial].name}`);
-  }, [currentTestimonial]);
+  const currentPage = Math.floor(currentTestimonialIndex / testimonialsPerPage);
+  const visibleTestimonials = testimonials.slice(currentTestimonialIndex, currentTestimonialIndex + testimonialsPerPage);
 
   const nextTestimonial = () => {
-    if (!isAnimating) {
-      setIsAnimating(true);
-      const newIndex = (currentTestimonial + 1) % testimonials.length;
-      setCurrentTestimonial(newIndex);
-      console.log(`Navigation: Next -> Moving to testimonial ${newIndex + 1}`);
-      setTimeout(() => setIsAnimating(false), 500);
-    }
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrentTestimonialIndex(prev => (prev + testimonialsPerPage) % testimonials.length);
+    setTimeout(() => setIsAnimating(false), 500);
   };
 
   const previousTestimonial = () => {
-    if (!isAnimating) {
-      setIsAnimating(true);
-      const newIndex = (currentTestimonial - 1 + testimonials.length) % testimonials.length;
-      setCurrentTestimonial(newIndex);
-      console.log(`Navigation: Previous -> Moving to testimonial ${newIndex + 1}`);
-      setTimeout(() => setIsAnimating(false), 500);
-    }
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrentTestimonialIndex(prev => (prev - testimonialsPerPage + testimonials.length) % testimonials.length);
+    setTimeout(() => setIsAnimating(false), 500);
   };
 
-  const goToTestimonial = (index) => {
-    if (!isAnimating && index !== currentTestimonial) {
-      setIsAnimating(true);
-      setCurrentTestimonial(index);
-      console.log(`Direct navigation: Moving to testimonial ${index + 1}`);
-      setTimeout(() => setIsAnimating(false), 500);
-    }
+  const goToPage = (page) => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrentTestimonialIndex(page * testimonialsPerPage);
+    setTimeout(() => setIsAnimating(false), 500);
   };
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/50 to-slate-950 overflow-hidden">
   
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-start pl-10 px-4 sm:px-6 lg:pl-[280px] bg-[url('assets/img/back6.png')] bg-right bg-contain bg-no-repeat">
-        {/* Background Pattern - Flower-inspired */}
-        
-        {/* Animated Background */}
+      <section className="relative min-h-screen flex items-center justify-start pl-10 px-4 sm:px-6 lg:pl-[280px] bg-[url('assets/img/back10.png')] bg-right bg-contain bg-no-repeat">
         <div className="fixed inset-0 -z-10">
           <div 
             className="absolute w-96 h-96 rounded-full opacity-20 blur-3xl transition-all duration-1000 ease-out"
@@ -130,14 +123,12 @@ const Home = () => {
         </div>
 
         <div className="max-w-7xl w-full">
-          {/* Floating Badge */}
           <div className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 backdrop-blur-xl rounded-full border border-white/10 mb-8 text-sm font-medium text-violet-300 shadow-2xl animate-float">
             <Sparkles className="w-4 h-4" />
             AI-Powered Flower Quality Assessment
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
           </div>
 
-          {/* Main Heading */}
           <h1 className="text-5xl md:text-7xl lg:text-6xl font-black mb-8 tracking-tight text-left">
             <span className="block bg-gradient-to-r from-violet-300 via-fuchsia-300 to-pink-300 bg-clip-text text-transparent animate-gradient-x">
               Premium
@@ -157,7 +148,6 @@ const Home = () => {
             delivering only Grade A & B quality flowers to your doorstep.
           </p>
 
-          {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-6 mb-16 justify-start">
             <button
               className="group relative px-10 py-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-2xl font-semibold text-white text-lg shadow-2xl hover:shadow-violet-500/25 transition-all duration-500 transform hover:scale-105 hover:-translate-y-1 overflow-hidden"
@@ -180,7 +170,6 @@ const Home = () => {
             </button>
           </div>
 
-          {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-0 max-w-3xl">
             <div className="text-left bottom ">
               <div className="text-2xl md:text-3xl font-thin text-white mb-1">99.8%</div>
@@ -201,8 +190,6 @@ const Home = () => {
             </div>
           </div>
         </div>
-
-        
       </section>
 
       {/* Features Section */}
@@ -267,8 +254,7 @@ const Home = () => {
           </div>
 
           <div className="relative">
-            {/* Connection Lines */}
-            <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-violet-500/50 via-fuchsia-500/50 to-pink-500/50 transform -translate-y-1/2" />
+           
             
             <div className="grid lg:grid-cols-3 gap-12 relative z-10">
               {[
@@ -289,8 +275,11 @@ const Home = () => {
                 }
               ].map((item, index) => (
                 <div key={index} className="text-center relative">
-                  <div className="relative inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-full text-3xl font-black text-white mb-8 shadow-2xl">
+                  <div className="relative inline-flex items-center justify-center w-24 h-24 bg-gradi
+                  ent-to-br from-violet-600 to-fuchsia-600 rounded-full text-3xl font-black text-white mb-8 shadow-2xl">
+                    
                     <div className="absolute inset-0 bg-gradient-to-br from-violet-400 to-fuchsia-400 rounded-full animate-pulse opacity-75" />
+                    
                     <span className="relative">{item.step}</span>
                   </div>
                   <h3 className="text-2xl font-bold text-white mb-4">{item.title}</h3>
@@ -302,150 +291,126 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Testimonials Section (Modified) */}
       <section className="py-32 px-4 sm:px-6 lg:px-8 bg-transparent relative overflow-hidden">
-      
-
-      <div className="max-w-5xl mx-auto relative z-10">
-        {/* Header */}
-        <div className="text-center mb-20">
-          <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-8">
-            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-            <span className="text-sm font-medium text-white/80">Trusted by 10,000+ professionals</span>
-          </div>
-          
-          <h2 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-200 to-white mb-6">
-            Loved by{' '}
-            <span className="bg-gradient-to-r from-violet-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
-              Innovators
-            </span>
-          </h2>
-          
-          <p className="text-xl text-white/60 max-w-2xl mx-auto">
-            See why thousands of professionals choose our platform to transform their workflow
-          </p>
-        </div>
-
-        {/* Single Testimonial Card with Navigation */}
-        <div className="relative mb-16">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10"></div>
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full px-6 py-2 mb-8">
+              <Star className="w-4 h-4 text-yellow-400 fill-current" />
+              <span className="text-sm font-medium text-white/80">Trusted by 10,000+ professionals</span>
+            </div>
             
-            {/* Navigation buttons */}
+            <h2 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-200 to-white mb-6">
+              Loved by{' '}
+              <span className="bg-gradient-to-r from-violet-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
+                Innovators
+              </span>
+            </h2>
+            
+            <p className="text-xl text-white/60 max-w-2xl mx-auto">
+              See why thousands of professionals choose our platform to transform their workflow
+            </p>
+          </div>
+
+          <div className="relative">
             <button
               onClick={previousTestimonial}
               disabled={isAnimating}
-              className="absolute left-6 top-1/2 transform -translate-y-1/2 z-20 w-14 h-14 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 group disabled:opacity-50 disabled:cursor-not-allowed"
+              className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 z-20 w-10 h-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 group disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ChevronLeft className="w-6 h-6 text-white group-hover:text-purple-300 transition-colors" />
+              <ChevronLeft className="w-5 h-5 text-white group-hover:text-purple-300 transition-colors" />
             </button>
             
             <button
               onClick={nextTestimonial}
               disabled={isAnimating}
-              className="absolute right-6 top-1/2 transform -translate-y-1/2 z-20 w-14 h-14 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 group disabled:opacity-50 disabled:cursor-not-allowed"
+              className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-4 z-20 w-10 h-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 group disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ChevronRight className="w-6 h-6 text-white group-hover:text-purple-300 transition-colors" />
+              <ChevronRight className="w-5 h-5 text-white group-hover:text-purple-300 transition-colors" />
             </button>
 
-            {/* Testimonial content */}
-            <div className="relative px-16 py-16 md:px-24 md:py-20">
-              <div className="text-center max-w-4xl mx-auto">
-                {/* Quote icon */}
-                <div className="flex justify-center mb-8">
-                  <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg transform transition-transform duration-300">
-                    <Quote className="w-10 h-10 text-white" />
+            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-8 transition-opacity duration-500 ${
+              isAnimating ? 'opacity-70' : 'opacity-100'
+            }`}>
+              {visibleTestimonials.map((testimonial) => (
+                <div 
+                  key={testimonial.id}
+                  className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+                >
+                  <div className="mb-4 text-purple-400">
+                    <Quote className="w-8 h-8" />
                   </div>
-                </div>
 
-                {/* Stars */}
-                <div className="flex items-center justify-center mb-8 gap-1">
-                  {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 text-yellow-400 fill-current drop-shadow-sm" />
-                  ))}
-                </div>
+                  <div className="flex items-center mb-4 gap-1">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
 
-                {/* Testimonial text with animation */}
-                <div className="relative h-32 md:h-24 mb-12 flex items-center justify-center">
-                  <blockquote className={`absolute inset-0 flex items-center justify-center text-2xl md:text-xl text-white font-light leading-relaxed transition-all duration-500 ${
-                    isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
-                  }`}>
-                    "{testimonials[currentTestimonial].text}"
+                  <blockquote className="text-gray-300 mb-6 leading-relaxed">
+                    "{testimonial.text}"
                   </blockquote>
-                </div>
 
-                {/* Author info with animation */}
-                <div className={`flex items-center justify-center gap-6 transition-all duration-500 delay-100 ${
-                  isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
-                }`}>
-                  <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
-                    <span className="text-white font-bold text-xl">{testimonials[currentTestimonial].avatar}</span>
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold text-white text-xl">{testimonials[currentTestimonial].name}</div>
-                    <div className="text-purple-300 text-lg">{testimonials[currentTestimonial].role}</div>
-                    <div className="text-white/60 text-base">{testimonials[currentTestimonial].company}</div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
+                      {testimonial.avatar}
+                    </div>
+                    <div>
+                      <div className="font-semibold text-white">{testimonial.name}</div>
+                      <div className="text-purple-300 text-sm">{testimonial.role}</div>
+                      <div className="text-gray-400 text-sm">{testimonial.company}</div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
 
-          {/* Progress indicator */}
-          <div className="flex justify-center mt-8 gap-2">
-            <span className="text-white/60 text-sm">
-              {currentTestimonial + 1} of {testimonials.length}
-            </span>
+          <div className="flex flex-col items-center mt-12">
+            <div className="w-full max-w-md h-1.5 bg-gray-800 rounded-full mb-4 overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-purple-400 to-pink-400 rounded-full transition-all duration-1000"
+                style={{ 
+                  width: `${((currentTestimonialIndex + testimonialsPerPage) % testimonials.length) * (100 / testimonials.length)}%` 
+                }}
+              ></div>
+            </div>
+            
+            <div className="flex gap-2">
+              {Array.from({ length: Math.ceil(testimonials.length / testimonialsPerPage) }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => goToPage(i)}
+                  className={`w-3 h-3 rounded-full transition-all ${
+                    currentPage === i ? 'bg-purple-400 w-6' : 'bg-gray-600 hover:bg-gray-500'
+                  }`}
+                  aria-label={`Go to page ${i + 1}`}
+                />
+              ))}
+            </div>
           </div>
 
-          {/* Pagination dots */}
-          <div className="flex justify-center mt-6 gap-3">
-            {testimonials.map((_, index) => (
-              <button
-                key={index}
-                className={`group relative overflow-hidden transition-all duration-300 ${
-                  index === currentTestimonial 
-                    ? 'w-12 h-4' 
-                    : 'w-4 h-4 hover:w-6'
-                }`}
-                onClick={() => goToTestimonial(index)}
-                disabled={isAnimating}
-              >
-                <div className={`absolute inset-0 rounded-full transition-all duration-300 ${
-                  index === currentTestimonial
-                    ? 'bg-gradient-to-r from-purple-400 to-pink-400'
-                    : 'bg-white/30 group-hover:bg-white/50'
-                }`}></div>
-                {index === currentTestimonial && (
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 animate-pulse"></div>
-                )}
-              </button>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mt-20">
+            {[
+              { number: '10,000+', label: 'Happy Users' },
+              { number: '99.9%', label: 'Uptime' },
+              { number: '4.9/5', label: 'Average Rating' },
+              { number: '50+', label: 'Countries' }
+            ].map((stat, index) => (
+              <div key={index} className="text-center group">
+                <div className="inline-flex flex-col items-center p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 transition-all duration-300 group-hover:bg-white/10 group-hover:scale-105 w-full">
+                  <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-2">
+                    {stat.number}
+                  </div>
+                  <div className="text-white/60 text-sm font-medium">
+                    {stat.label}
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
-
-        {/* Stats section */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {[
-            { number: '10,000+', label: 'Happy Users' },
-            { number: '99.9%', label: 'Uptime' },
-            { number: '4.9/5', label: 'Average Rating' },
-            { number: '50+', label: 'Countries' }
-          ].map((stat, index) => (
-            <div key={index} className="text-center group">
-              <div className="inline-flex flex-col items-center p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 transition-all duration-300 group-hover:bg-white/10 group-hover:scale-105 w-full">
-                <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-2">
-                  {stat.number}
-                </div>
-                <div className="text-white/60 text-sm font-medium">
-                  {stat.label}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
+      </section>
 
       {/* CTA Section */}
       <section className="py-32 px-4 sm:px-6 lg:px-8 relative">

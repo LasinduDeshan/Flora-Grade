@@ -53,6 +53,10 @@ async def grade_flower(
         edge_density, brown_ratio = damage_score(np_img)
         circularity = shape_uniformity(np_img)
         
+        # Heuristic: Check if image is likely not a flower
+        if vibrancy < 0.15 or symmetry < 0.3 or circularity < 0.2:
+            raise HTTPException(status_code=400, detail="The uploaded image does not appear to be a flower.")
+        
         # Grade the flower using CNN
         from flower_grader_api import cnn_model
         if cnn_model is None:

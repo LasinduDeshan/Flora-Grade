@@ -5,9 +5,12 @@ import os
 import uuid
 import requests
 from database import get_db
-from models import User, Product, FlowerGrade as FlowerGradeModel, UserRole, FlowerGrade as GradeEnum
+from models import User, Product, FlowerGrade as FlowerGradeModel, UserRole, FlowerGrade as GradeEnum, PendingProduct
 from schemas import ProductCreate, ProductUpdate, Product as ProductSchema, ProductWithGrade
 from auth import get_current_active_user, require_role
+import random
+import smtplib
+from email.mime.text import MIMEText
 
 router = APIRouter(prefix="/products", tags=["products"])
 
@@ -79,7 +82,7 @@ async def create_product(
             category=category,
             image_url=f"/uploads/{filename}",  # Use the URL path, not the file path
             seller_id=current_user.id,
-            is_approved=True,  # or your logic
+            is_approved=True,  # Immediately approve new products
             is_active=True
         )
         db.add(product)
@@ -110,6 +113,8 @@ async def get_products(
     if grade_filter:
         query = query.join(FlowerGradeModel).filter(FlowerGradeModel.grade == grade_filter)
     
+    # Order by latest first
+    query = query.order_by(Product.id.desc())
     products = query.offset(skip).limit(limit).all()
     
     # Create ProductWithGrade objects
@@ -335,4 +340,97 @@ async def link_flower_grade(
     db.commit()
     db.refresh(product)
     
-    return {"message": "Flower grade linked successfully"} 
+    return {"message": "Flower grade linked successfully"}
+
+def generate_otp():
+    return str(random.randint(100000, 999999))
+
+def send_otp_email(to_email, otp):
+    # Simple SMTP example, replace with your SMTP server details
+    smtp_server = 'smtp.gmail.com'
+    smtp_port = 587
+    smtp_user = 'luminasolar101@gmail.com'  # Replace with your email
+    smtp_password = 'rnccqjuosxsduecc'      # Replace with your password
+    msg = MIMEText(f'Your OTP for product addition is: {otp}')
+    msg['Subject'] = 'FloraGrade Product Addition OTP'
+    msg['From'] = smtp_user
+    msg['To'] = to_email
+    with smtplib.SMTP(smtp_server, smtp_port) as server:
+        server.starttls()
+        server.login(smtp_user, smtp_password)
+        server.sendmail(smtp_user, [to_email], msg.as_string())
+
+@router.post("/initiate-add")
+async def initiate_add_product(
+    name: str = Form(...),
+    description: str = Form(...),
+    price: float = Form(...),
+    stock_quantity: int = Form(...),
+    category: str = Form("roses"),
+    image: UploadFile = File(...),
+    current_user: User = Depends(require_role(UserRole.SELLER)),
+    db: Session = Depends(get_db)
+):
+    import os, uuid, traceback
+    try:
+        # Save image
+        upload_dir = "uploads"
+        os.makedirs(upload_dir, exist_ok=True)
+        ext = image.filename.split(".")[-1]
+        filename = f"product_{uuid.uuid4()}.{ext}"
+        filepath = os.path.join(upload_dir, filename)
+        with open(filepath, "wb") as f:
+            f.write(await image.read())
+        # Generate OTP
+        otp = generate_otp()
+        # Save pending product
+        pending = PendingProduct(
+            name=name,
+            description=description,
+            price=price,
+            stock_quantity=stock_quantity,
+            category=category,
+            image_url=f"/uploads/{filename}",
+            seller_id=current_user.id,
+            otp=otp,
+            email=current_user.email
+        )
+        db.add(pending)
+        db.commit()
+        db.refresh(pending)
+        # Send OTP email
+        send_otp_email(current_user.email, otp)
+        return {"pending_product_id": pending.id, "message": "OTP sent to your email."}
+    except Exception as e:
+        print("INITIATE PRODUCT ERROR:", str(e))
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Failed to initiate product addition: {str(e)}")
+
+@router.post("/verify-otp")
+async def verify_otp_and_add_product(
+    pending_product_id: int = Form(...),
+    otp: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    pending = db.query(PendingProduct).filter(PendingProduct.id == pending_product_id).first()
+    if not pending:
+        raise HTTPException(status_code=404, detail="Pending product not found")
+    if pending.otp != otp:
+        raise HTTPException(status_code=400, detail="Invalid OTP")
+    # Create the actual product
+    product = Product(
+        name=pending.name,
+        description=pending.description,
+        price=pending.price,
+        stock_quantity=pending.stock_quantity,
+        category=pending.category,
+        image_url=pending.image_url,
+        seller_id=pending.seller_id,
+        is_approved=True,
+        is_active=True
+    )
+    db.add(product)
+    db.delete(pending)
+    db.commit()
+    db.refresh(product)
+    return {"id": product.id, "message": "Product added successfully!"} 

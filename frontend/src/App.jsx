@@ -14,6 +14,7 @@ import SellerDashboard from './pages/SellerDashboard'
 import FlowerGrading from './pages/FlowerGrading'
 import Profile from './pages/Profile'
 import Orders from './pages/Orders'
+import Checkout from './pages/Checkout'
 import Footer from './components/Footer'
 
 function AppLayout({ children, user, logout }) {
@@ -115,6 +116,7 @@ function App() {
                 <Route path="/flower-grading" element={<FlowerGrading />} />
                 <Route path="/profile" element={user ? <Profile user={user} /> : <Navigate to="/login" />} />
                 <Route path="/orders" element={user ? <Orders /> : <Navigate to="/login" />} />
+                <Route path="/checkout" element={user ? <Checkout /> : <Navigate to="/login" />} />
                 {/* Seller Routes */}
                 <Route path="/seller/add-product" element={user?.role === 'seller' ? <AddProduct /> : <Navigate to="/login" />} />
                 <Route path="/seller/dashboard" element={user?.role === 'seller' ? <SellerDashboard /> : <Navigate to="/login" />} />

@@ -98,7 +98,7 @@ def predict_grade_cnn(image: Image.Image):
     with torch.no_grad():
         output = cnn_model(img_tensor)
         pred = output.argmax(dim=1).item()
-    grade_map = {0: 'A', 1: 'B', 2: 'C'}
+    grade_map = {0: 'A', 1: 'B', 2: 'C', 3: 'not_flower'}
     return grade_map[pred]
 
 @app.post("/grade-flower")
@@ -120,6 +120,8 @@ async def grade_flower(file: UploadFile = File(...)):
             raise HTTPException(status_code=500, detail="CNN model not loaded")
             
         grade = predict_grade_cnn(image)
+        if grade == "not_flower":
+            raise HTTPException(status_code=400, detail="The uploaded image does not appear to be a flower.")
         explanation = grade_flower_logic(vibrancy, symmetry, edge_density, brown_ratio, circularity)[1]
         
         logger.info(f"Grading completed: Grade {grade}")
